@@ -1,0 +1,10 @@
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.venv/
+.claude/
+
+config/settings.json
+config/*.zip
+config/stockfish*/
+logs/*.log

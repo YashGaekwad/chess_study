@@ -1,0 +1,9 @@
+PySide6>=6.7
+opencv-python>=4.9
+numpy>=1.26
+python-chess>=1.999
+mss>=9.0
+Pillow>=10.0
+pytest>=8.0
+ultralytics>=8.2; python_version < "3.13"
+onnxruntime>=1.18; python_version < "3.13"
