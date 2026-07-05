@@ -1,17 +1,34 @@
 from __future__ import annotations
 
 import json
+import sys
 from dataclasses import asdict, dataclass, field
 from pathlib import Path
 from typing import Any
 
 
 ROOT_DIR = Path(__file__).resolve().parent
-CONFIG_DIR = ROOT_DIR / "config"
+# Writable/persistent data (settings, logs) must live next to the exe, not in
+# PyInstaller's onefile temp extraction dir, which is wiped on exit.
+APP_DIR = Path(sys.executable).resolve().parent if getattr(sys, "frozen", False) else ROOT_DIR
+CONFIG_DIR = APP_DIR / "config"
 SETTINGS_PATH = CONFIG_DIR / "settings.json"
 ASSETS_DIR = ROOT_DIR / "assets"
 MODELS_DIR = ROOT_DIR / "models"
-LOGS_DIR = ROOT_DIR / "logs"
+LOGS_DIR = APP_DIR / "logs"
+
+_STOCKFISH_CANDIDATE_NAMES = ("stockfish.exe", "stockfish-windows-x86-64-avx2.exe")
+
+
+def _default_stockfish_path() -> str:
+    """Look for a Stockfish binary shipped next to the app before falling
+    back to PATH lookup, so a packaged exe works without extra setup."""
+    for directory in (APP_DIR, ROOT_DIR):
+        for name in _STOCKFISH_CANDIDATE_NAMES:
+            candidate = directory / name
+            if candidate.exists():
+                return str(candidate)
+    return "stockfish"
 
 
 @dataclass(slots=True)
@@ -24,7 +41,7 @@ class CaptureRegion:
 
 @dataclass(slots=True)
 class EngineSettings:
-    stockfish_path: str = "stockfish"
+    stockfish_path: str = field(default_factory=_default_stockfish_path)
     depth: int = 14
     skill_level: int = 20
     threads: int = 2
